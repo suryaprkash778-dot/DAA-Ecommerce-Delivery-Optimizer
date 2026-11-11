@@ -1,28 +1,48 @@
-case 5: {
-                // Testing Greedy Methods (Dijkstra) implementation[cite: 1]
-                std::cout << "\n--- Calculating Shortest Delivery Routes ---\n";
-                
-                // Create a dummy network graph with 4 nodes (0 to 3)[cite: 1]
-                // Node 0: Fulfillment Center, Nodes 1-3: Customer Zones
-                DeliveryNetwork network(4);
-                
-                // Add edges: {targetNode, travelTime, cost}
-                network[0].push_back({1, 10.5, 5.0});
-                network[0].push_back({2, 15.0, 7.5});
-                network[1].push_back({2, 3.5,  2.0});
-                network[1].push_back({3, 20.0, 10.0});
-                network[2].push_back({3, 10.0, 5.0});
-                
-                int fulfillmentCenter = 0;
-                std::vector<double> shortestTimes = calculateShortestPaths(network, fulfillmentCenter);
-                
-                std::cout << "[SUCCESS] Shortest travel times from Fulfillment Center (Node 0):\n";
-                for (size_t i = 0; i < shortestTimes.size(); ++i) {
-                    if (shortestTimes[i] == std::numeric_limits<double>::infinity()) {
-                        std::cout << " - Node " << i << ": Unreachable\n";
-                    } else {
-                        std::cout << " - Node " << i << ": " << shortestTimes[i] << " mins\n";
-                    }
-                }
-                break;
+// greedy_algorithms.h
+#ifndef GREEDY_ALGORITHMS_H
+#define GREEDY_ALGORITHMS_H
+
+#include "domain.h"
+#include <vector>
+#include <queue>
+#include <limits>
+#include <iostream>
+#include <utility>
+
+// Dijkstra's algorithm to find non-negative shortest paths for delivery routing[cite: 1]
+inline std::vector<double> calculateShortestPaths(const DeliveryNetwork& graph, int sourceNode) {
+    int n = graph.size();
+    std::vector<double> dist(n, std::numeric_limits<double>::infinity());
+    dist[sourceNode] = 0.0;
+
+    // Min-heap priority queue storing pairs of (distance, node)
+    using pdi = std::pair<double, int>;
+    std::priority_queue<pdi, std::vector<pdi>, std::greater<pdi>> pq;
+    
+    pq.push({0.0, sourceNode});
+
+    while (!pq.empty()) {
+        double currentDist = pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+
+        // Skip if we already found a shorter path to u
+        if (currentDist > dist[u]) continue;
+
+        // Traverse all adjacent nodes
+        for (const Edge& edge : graph[u]) {
+            int v = edge.targetNode;
+            double weight = edge.travelTime; // Routing optimized for travel time
+
+            // Relaxation step
+            if (dist[u] + weight < dist[v]) {
+                dist[v] = dist[u] + weight;
+                pq.push({dist[v], v});
             }
+        }
+    }
+
+    return dist;
+}
+
+#endif
