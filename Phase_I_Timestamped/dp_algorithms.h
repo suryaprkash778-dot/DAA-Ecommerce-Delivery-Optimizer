@@ -5,47 +5,42 @@
 #include "domain.h"
 #include <vector>
 #include <algorithm>
-#include <iostream>
 
-// 0/1 Knapsack using Dynamic Programming to maximize priority/value within vehicle capacity
-std::vector<Order> packVehicleKnapsack(const std::vector<Order>& availableOrders, double vehicleCapacity) {
-    int n = availableOrders.size();
-    // Multiply capacity by 10 or 100 to handle one decimal place for array indices if needed, 
-    // or assume integer weights for the standard DP matrix. We will cast to int for this prototype.
-    int W = static_cast<int>(vehicleCapacity); 
-
-    // DP table: dp[i][w] stores maximum priority value
+// 0/1 Knapsack DP to maximize vehicle packing
+inline std::vector<Order> packVehicleKnapsack(const std::vector<Order>& orders, double weightCapacity) {
+    int n = orders.size();
+    int W = static_cast<int>(weightCapacity); 
+    
+    // DP table initialized to 0
     std::vector<std::vector<int>> dp(n + 1, std::vector<int>(W + 1, 0));
-
-    // Build table dp[][] in bottom-up manner
+    
+    // Build table
     for (int i = 1; i <= n; i++) {
+        int wt = static_cast<int>(orders[i-1].totalWeight);
+        
+        // FIX: Invert priority for DP math. Priority 1 (High) = 10 value, Priority 2 (Std) = 5 value.
+        int val = (orders[i-1].priority == 1) ? 10 : 5; 
+        
         for (int w = 0; w <= W; w++) {
-            int weight = static_cast<int>(availableOrders[i - 1].totalWeight);
-            // Invert priority so 1 (High) has higher value than 2 (Standard). 
-            // e.g., Value = 3 - priority (Pri 1 = Val 2; Pri 2 = Val 1)
-            int value = 3 - availableOrders[i - 1].priority; 
-
-            if (weight <= w) {
-                dp[i][w] = std::max(value + dp[i - 1][w - weight], dp[i - 1][w]);
+            if (wt <= w) {
+                dp[i][w] = std::max(val + dp[i-1][w - wt], dp[i-1][w]);
             } else {
-                dp[i][w] = dp[i - 1][w];
+                dp[i][w] = dp[i-1][w];
             }
         }
     }
-
-    // Backtrack to find the selected orders
+    
+    // Backtrack to find which exact orders were packed
     std::vector<Order> packedOrders;
-    int res = dp[n][W];
     int w = W;
-    for (int i = n; i > 0 && res > 0; i--) {
-        if (res != dp[i - 1][w]) {
-            packedOrders.push_back(availableOrders[i - 1]);
-            int weight = static_cast<int>(availableOrders[i - 1].totalWeight);
-            res -= (3 - availableOrders[i - 1].priority);
-            w -= weight;
+    for (int i = n; i > 0 && dp[i][w] > 0; i--) {
+        // If the value came from the current item, we packed it
+        if (dp[i][w] != dp[i-1][w]) {
+            packedOrders.push_back(orders[i-1]);
+            w -= static_cast<int>(orders[i-1].totalWeight);
         }
     }
-
+    
     return packedOrders;
 }
 
