@@ -8,10 +8,11 @@
 #include "greedy_algorithms.h"
 
 void testSorting() {
+    // Struct: {orderId, destinationNode, totalWeight, priority}
     std::vector<Order> orders = { 
-        {"ORD3", 5, 10.0, 1}, 
+        {"ORD3", 1, 10.0, 1}, 
         {"ORD1", 2, 5.0, 2}, 
-        {"ORD2", 8, 20.0, 1} 
+        {"ORD2", 3, 20.0, 1} 
     };
     
     mergeSortOrders(orders, 0, orders.size() - 1);
@@ -26,14 +27,15 @@ void testSorting() {
 }
 
 void testKnapsack() {
+    // Struct: {orderId, destinationNode, totalWeight, priority}
     std::vector<Order> orders = { 
-        {"ORD1", 2, 5.0, 1}, 
-        {"ORD2", 8, 20.0, 1}, 
-        {"ORD3", 5, 12.0, 1} 
+        {"ORD1", 1, 5.0, 1},  // Weight 5.0
+        {"ORD2", 2, 8.0, 1},  // Weight 8.0
+        {"ORD3", 3, 12.0, 2}  // Weight 12.0
     };
     
-    // Normal Case: Capacity 15. Should pick ORD2 (Wt 8, Val 20) and ORD3 (Wt 5, Val 12).
-    // Total weight 13 <= 15. Total value 32.
+    // Normal Case: Capacity 15. Should pick ORD1 (Wt 5) and ORD2 (Wt 8).
+    // Total weight 13 <= 15.
     std::vector<Order> packed = packVehicleKnapsack(orders, 15.0);
     assert(packed.size() == 2);
     
