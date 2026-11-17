@@ -3,15 +3,16 @@
 #define ALGORITHMS_H
 
 #include "domain.h"
-#include <vector>
-#include <string>
-#include <utility>
+#include <stdlib.h>
+#include <string.h>
 
-// Merge Sort to prioritize orders by weight or priority[cite: 1]
-inline void merge(std::vector<Order>& orders, int left, int mid, int right) {
+// Merge Sort to prioritize orders by weight or priority
+static inline void merge(Order orders[], int left, int mid, int right) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
-    std::vector<Order> L(n1), R(n2);
+    
+    Order *L = (Order *)malloc(n1 * sizeof(Order));
+    Order *R = (Order *)malloc(n2 * sizeof(Order));
 
     for (int i = 0; i < n1; i++) L[i] = orders[left + i];
     for (int j = 0; j < n2; j++) R[j] = orders[mid + 1 + j];
@@ -27,9 +28,12 @@ inline void merge(std::vector<Order>& orders, int left, int mid, int right) {
     }
     while (i < n1) orders[k++] = L[i++];
     while (j < n2) orders[k++] = R[j++];
+
+    free(L);
+    free(R);
 }
 
-inline void mergeSortOrders(std::vector<Order>& orders, int left, int right) {
+static inline void mergeSortOrders(Order orders[], int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;
         mergeSortOrders(orders, left, mid);
@@ -38,21 +42,29 @@ inline void mergeSortOrders(std::vector<Order>& orders, int left, int right) {
     }
 }
 
-// Quick Sort to organize orders alphabetically by orderId[cite: 1]
-inline int partition(std::vector<Order>& orders, int left, int right) {
-    std::string pivot = orders[right].orderId;
+// Quick Sort to organize orders alphabetically by orderId
+static inline int partition(Order orders[], int left, int right) {
+    char* pivot = orders[right].orderId;
     int i = (left - 1);
     for (int j = left; j <= right - 1; j++) {
-        if (orders[j].orderId < pivot) {
+        // String comparison for alphabetical sorting
+        if (strcmp(orders[j].orderId, pivot) < 0) {
             i++;
-            std::swap(orders[i], orders[j]);
+            // Swap orders[i] and orders[j]
+            Order temp = orders[i];
+            orders[i] = orders[j];
+            orders[j] = temp;
         }
     }
-    std::swap(orders[i + 1], orders[right]);
+    // Swap orders[i + 1] and orders[right]
+    Order temp = orders[i + 1];
+    orders[i + 1] = orders[right];
+    orders[right] = temp;
+    
     return (i + 1);
 }
 
-inline void quickSortOrdersById(std::vector<Order>& orders, int left, int right) {
+static inline void quickSortOrdersById(Order orders[], int left, int right) {
     if (left < right) {
         int pi = partition(orders, left, right);
         quickSortOrdersById(orders, left, pi - 1);
@@ -60,13 +72,15 @@ inline void quickSortOrdersById(std::vector<Order>& orders, int left, int right)
     }
 }
 
-// Iterative binary search to retrieve a specific order by orderId (requires array to be sorted by ID first)[cite: 1]
-inline int binarySearchOrder(const std::vector<Order>& orders, const std::string& targetId) {
-    int left = 0, right = orders.size() - 1;
+// Iterative binary search to retrieve a specific order by orderId (requires array to be sorted by ID first)
+static inline int binarySearchOrder(const Order orders[], int num_orders, const char* targetId) {
+    int left = 0, right = num_orders - 1;
     while (left <= right) {
         int mid = left + (right - left) / 2;
-        if (orders[mid].orderId == targetId) return mid;
-        if (orders[mid].orderId < targetId) left = mid + 1;
+        int cmp = strcmp(orders[mid].orderId, targetId);
+        
+        if (cmp == 0) return mid;
+        if (cmp < 0) left = mid + 1;
         else right = mid - 1;
     }
     return -1;
