@@ -1,10 +1,10 @@
 # CMakeLists.txt
 cmake_minimum_required(VERSION 3.10)
-project(EcommerceOptimizer)
+project(EcommerceOptimizer C)
 
-# The syllabus mandates C++17 or later[cite: 1]
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+# Set the C standard (C11 is standard for modern C development)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED True)
 
-# Compile main.cpp into an executable named EcommerceOptimizer[cite: 1]
-add_executable(EcommerceOptimizer main.cpp)
+# Compile main.c into an executable named EcommerceOptimizer
+add_executable(EcommerceOptimizer main.c)
