@@ -3,27 +3,36 @@
 #define DP_ALGORITHMS_H
 
 #include "domain.h"
-#include <vector>
-#include <algorithm>
+#include <stdlib.h>
+
+// Helper function to find the maximum of two integers
+static inline int max_val(int a, int b) {
+    return (a > b) ? a : b;
+}
 
 // 0/1 Knapsack DP to maximize vehicle packing
-inline std::vector<Order> packVehicleKnapsack(const std::vector<Order>& orders, double weightCapacity) {
-    int n = orders.size();
-    int W = static_cast<int>(weightCapacity); 
+// Returns a dynamically allocated array of packed Orders. 
+// The number of packed orders is stored in the integer pointed to by packedCount.
+// NOTE: The caller is responsible for freeing the returned memory.
+static inline Order* packVehicleKnapsack(const Order orders[], int n, double weightCapacity, int* packedCount) {
+    int W = (int)weightCapacity; 
     
-    // DP table initialized to 0
-    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(W + 1, 0));
+    // DP table allocation and initialization to 0
+    int** dp = (int**)malloc((n + 1) * sizeof(int*));
+    for (int i = 0; i <= n; i++) {
+        dp[i] = (int*)calloc((W + 1), sizeof(int));
+    }
     
     // Build table
     for (int i = 1; i <= n; i++) {
-        int wt = static_cast<int>(orders[i-1].totalWeight);
+        int wt = (int)orders[i-1].totalWeight;
         
         // FIX: Invert priority for DP math. Priority 1 (High) = 10 value, Priority 2 (Std) = 5 value.
         int val = (orders[i-1].priority == 1) ? 10 : 5; 
         
         for (int w = 0; w <= W; w++) {
             if (wt <= w) {
-                dp[i][w] = std::max(val + dp[i-1][w - wt], dp[i-1][w]);
+                dp[i][w] = max_val(val + dp[i-1][w - wt], dp[i-1][w]);
             } else {
                 dp[i][w] = dp[i-1][w];
             }
@@ -31,15 +40,24 @@ inline std::vector<Order> packVehicleKnapsack(const std::vector<Order>& orders, 
     }
     
     // Backtrack to find which exact orders were packed
-    std::vector<Order> packedOrders;
+    Order* packedOrders = (Order*)malloc(n * sizeof(Order)); // Max possible size is n
+    *packedCount = 0;
+    
     int w = W;
     for (int i = n; i > 0 && dp[i][w] > 0; i--) {
         // If the value came from the current item, we packed it
         if (dp[i][w] != dp[i-1][w]) {
-            packedOrders.push_back(orders[i-1]);
-            w -= static_cast<int>(orders[i-1].totalWeight);
+            packedOrders[*packedCount] = orders[i-1];
+            (*packedCount)++;
+            w -= (int)orders[i-1].totalWeight;
         }
     }
+    
+    // Free the dynamically allocated DP table
+    for (int i = 0; i <= n; i++) {
+        free(dp[i]);
+    }
+    free(dp);
     
     return packedOrders;
 }
