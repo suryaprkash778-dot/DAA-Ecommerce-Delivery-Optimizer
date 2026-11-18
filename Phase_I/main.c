@@ -12,10 +12,11 @@
 void displayMenu() {
     printf("\n=== E-Commerce Order & Delivery Optimizer (C Version) ===\n");
     printf("1. Load Dummy Order Data\n");
-    printf("2. Sort Orders (Merge Sort)\n");
-    printf("3. Search Order (Binary Search)\n");
-    printf("4. Pack Delivery Vehicle (0/1 Knapsack DP)\n");
-    printf("5. Calculate Shortest Routes (Dijkstra)\n");
+    printf("2. Enter Orders Manually\n");
+    printf("3. Sort Orders (Merge Sort)\n");
+    printf("4. Search Order (Binary Search)\n");
+    printf("5. Pack Delivery Vehicle (0/1 Knapsack DP)\n");
+    printf("6. Calculate Shortest Routes (Dijkstra)\n");
     printf("0. Exit\n");
     printf("Enter your choice: ");
 }
@@ -46,9 +47,36 @@ int main() {
                 printf("[SUCCESS] 4 dummy orders loaded.\n");
                 break;
 
-            case 2:
+            case 2: {
+                printf("Enter the number of orders to input (max %d): ", MAX_NODES);
+                int n;
+                if (scanf("%d", &n) == 1 && n > 0 && n <= MAX_NODES) {
+                    num_orders = n;
+                    for (int i = 0; i < num_orders; i++) {
+                        printf("\n--- Entering Details for Order %d ---\n", i + 1);
+                        printf("Order ID (e.g., ORD100, no spaces): ");
+                        scanf("%s", orders[i].orderId);
+                        
+                        printf("Priority (1 = High, 2 = Standard): ");
+                        scanf("%d", &orders[i].priority);
+                        
+                        printf("Weight (kg): ");
+                        scanf("%lf", &orders[i].totalWeight);
+                        
+                        printf("Destination Node (1-3): ");
+                        scanf("%d", &orders[i].destinationNode);
+                    }
+                    printf("[SUCCESS] %d manual orders successfully loaded.\n", num_orders);
+                } else {
+                    printf("[ERROR] Invalid number of orders.\n");
+                    while (getchar() != '\n'); // Clear the buffer
+                }
+                break;
+            }
+
+            case 3:
                 if (num_orders == 0) {
-                    printf("[ERROR] Please load data first (Option 1).\n");
+                    printf("[ERROR] Please load data first (Option 1 or 2).\n");
                     break;
                 }
                 // Testing the Divide and Conquer module.
@@ -62,7 +90,7 @@ int main() {
                 }
                 break;
 
-            case 3: {
+            case 4: {
                 if (num_orders == 0) {
                     printf("[ERROR] Please load and sort data first.\n");
                     break;
@@ -86,9 +114,9 @@ int main() {
                 break;
             }
 
-            case 4: {
+            case 5: {
                 if (num_orders == 0) {
-                    printf("[ERROR] Please load data first (Option 1).\n");
+                    printf("[ERROR] Please load data first (Option 1 or 2).\n");
                     break;
                 }
                 // Testing dynamic programming 0/1 knapsack implementation.
@@ -113,7 +141,7 @@ int main() {
                 break;
             }
 
-            case 5: {
+            case 6: {
                 // Testing Greedy Methods (Dijkstra) implementation
                 printf("\n--- Calculating Shortest Delivery Routes ---\n");
                 
